@@ -145,3 +145,68 @@ FROM countries c, locations loc,
 WHERE c.country_id=loc.country_id AND
       loc.location_id=dept.location_id
 ORDER BY c.country_name;
+
+/*
+문제7
+job_history테이블은 과거의 담당업무의 데이터를
+가지고 있다.
+과거의 업무아이디(job_id)가 'AC_ACCOUNT'로
+근무한 사원의 
+사번, 이름(풀네임), 업무아이디, 시작일, 종료일을 
+출력하세요
+이름은 first_name과 last_name을 합쳐 출력합니다
+(2건)
+*/
+--SELECT*FROM job_history WHERE job_id='AC_ACCOUNT';
+SELECT emp.employee_id 사번,
+       emp.first_name||' '||emp.last_name 이름,
+       emp.job_id 업무아이디,
+       jh.start_date 시작일,
+       jh.end_date 종료일
+FROM employees emp, job_history jh
+WHERE emp.employee_id=jh.employee_id
+      AND jh.job_id='AC_ACCOUNT';
+
+/*
+문제8
+각 부서(department)에 대해서 부서번호
+(department_id), 부서이름(department_name),
+매니저(manager)의 이름 (first_name), 위치 (location)
+한 도시(city),
+나라(countries)의 이름(countries_name) 그리고 지역 구분(regoins)의
+이름(resion_name)까지 전부 출력해 보세요
+(11건)
+*/
+SELECT dept.department_id,
+       dept.department_name,
+       man.first_name,
+       loc.city,
+       c.country_name,
+       reg.region_name
+FROM departments dept,
+     employees man,
+     locations loc,
+     countries c,
+     regions reg
+WHERE dept.manager_id=man.employee_id
+      AND
+      dept.location_id=loc.location_id
+      AND
+      loc.country_id= c.country_id
+      AND
+      c.region_id=reg.region_id;
+
+/*
+문제9
+각 사원(employee)에 대해서 사번(employee_id),
+이름(first_name), 부서명(department_name),
+매니저(manager)의 이름(first_name)을 조회하세요
+부서가 없는 직원 kimberely) 도 표시합니다
+(106명)
+*/
+SELECT emp.employee_id 사번,
+       emp.first_name 이름,
+       dept.department_name "매니저 이름"
+FROM employees emp, employees man, departments dept
+WHERE emp.department_id=dept.department_id(+) AND --LEFT OUTER
+      emp.manager_id=man.employee_id;
