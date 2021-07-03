@@ -165,3 +165,28 @@ SELECT emp.employee_id,emp.first_name,
        man.first_name
 FROM employees emp JOIN employees man
      ON emp.manager_id=man.employee_id;
+     
+----------
+-- Aggregation(집계)
+----------
+--여러 개의 값을 집계하여 하나의 결과값을 산출
+--count:갯수 세기 함수
+--employees 테이블은 몇 개의 레코드를 가지고 있는가?
+SELECT COUNT(*)FROM employees; --*는 전체 레코드 카운트를 집계(내부 값이 null이 있어도 집계)
+SELECT COUNT(commission_pct)FROM employees;
+--특정 컬럼을 명시하면 null인 것은 집계에서 제외
+SELECT COUNT(*) FROM employees WHERE commission_pct is not null;
+--위의 것과 같은 의미
+
+--합계 함수:SUM
+--급여의 총 합?
+SELECT SUM(salary) FROM employees;
+
+--평균 함수:AVG
+--평균 급여 산정
+SELECT AVG(salary) FROM employees;
+
+--사원들이 받는 평균 커미션 비율
+SELECT AVG(commission_pct) FROM employees;
+--null 데이터는 집계에서 배제 
+
