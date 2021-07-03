@@ -190,3 +190,44 @@ SELECT AVG(salary) FROM employees;
 SELECT AVG(commission_pct) FROM employees;
 --null 데이터는 집계에서 배제 
 
+SELECT AVG(nvl(commission_pct,0))FROM employees;
+
+--null이 포함된 집계는 null 값을 포함할 것인지 아닌지를 결정하고 집계
+
+--salary의 최솟값, 최댓값, 최댓값, 평균값, 중앙값
+SELECT MIN(salary), MAX(salary), AVG(salary), MEDIAN(salary)
+FROM employees;
+
+--흔히 범하는 오류
+--부서의 아이디, 급여 평균을 출력하고자 
+SELECT department_id, AVG(salary) FROM employees; --Error
+
+--만약에 부서별 평균 연봉을 구하려면?
+--부서별 Group을 지어준 데이터를 대상으로 집계 함수 수행
+SELECT department_id, ROUND(AVG(salary),2)
+FROM employees
+GROUP BY department_id
+ORDER BY department_id;
+
+--집계 함수를 사용한 SELECT 컬럼 목록에는 
+--집계에 참여한 필드, 집계함수만 올 수 있다.
+
+--부서별 평균 급여를 내림차순으로 출력
+SELECT department_id, ROUND(AVG(salary),2) sal_avg --별칭 사용
+FROM employees
+GROUP BY department_id
+ORDER BY sal_avg DESC;
+
+--부서별 평균 급여를 산출 평균 급여가 2000이상인 부서를 출력
+SELECT department_id, AVG(salary)
+FROM employees
+WHERE AVG(salary)>=20000 
+--이 시점에서는 AVG(salary)가 수행되지 않은 상태->djqtek
+GROUP BY department_id;
+--Erorr:집계 작업이 일어나기 전에 WHERE절이 실행되기 때문
+
+SELECT department_id, AVG(salary)
+FROM employees
+GROUP BY department_id --그룹핑
+HAVING AVG(salary)>=7000 --HAVING: GROUP by에 조건을 부여할 때 사용
+ORDER BY department_id;
