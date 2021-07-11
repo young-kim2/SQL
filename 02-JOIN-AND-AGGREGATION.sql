@@ -399,3 +399,82 @@ FROM employees
 WHERE hire_date LIKE '07%' AND rownum<=5
 ORDER BY salary DESC;
 --rownum이 정해진 이후 정렬을 수행
+
+--TOP K 쿼리
+SELECT rownum, first_name, salary
+       FROM (SELECT*FROM employees
+       WHERE hire_date LIKE '07%'
+       ORDER BY salary DESC)
+       WHERE rownum<=5;
+       
+--SET(집합)
+--UNION(합집합: 중복제거), UNION ALL(합집합: 중복제거 안함)
+--INTERSECT(교집합), MINUS(차집합)
+SELECT first_name, salary, hire_date FROM
+       employees WHERE hire_date<'05/01/01';
+--24
+SELECT first_name, salary, hire_date FROM
+       employees WHERE salary>12000;
+--8
+
+--교집합
+SELECT first_name, salary, hire_date FROM
+       employees WHERE hire_date<'05/01/01'
+       INTERSECT
+       SELECT first_name, salary, hire_date FROM
+       employees WHERE salary>12000;
+       
+--위의 것과 같은 의미
+SELECT first_name, salary, hire_date FROM
+       employees
+       WHERE hire_date<'05/01/01' AND salary>12000;
+       
+--합집합:UNION
+SELECT first_name, salary, hire_date FROM
+      employees WHERE hire_date<'05/01/01'
+      UNION
+      SELECT first_name,salary,hire_date FROM
+      employees WHERE salary>12000;
+--26
+
+--위의 것은 아래와 같은 의미
+SELECT first_name, salary, hire_date
+       FROM employees
+       WHERE hire_date<'05/01/01' OR salary>12000;
+       
+--차집합:MINUS
+SELECT first_name, salary, hire_date FROM
+       employees WHERE hire_date<'05/01/01'
+       MINUS
+       SELECT first_name, salary, hire_date FROM
+       employees WHERE salary>12000;
+
+--입사일이 05/01/01 이전인 사람들 중, 급여가 12000이하인 직원들
+SELECT first_name, salary, hire_date
+     FROM employees
+     WHERE hire_date<'05/01/01' AND
+     NOT(salary>12000);
+
+--RANK 함수
+SELECT salary, first_name,
+       RANK() OVER(ORDER BY salary DESC)as rank,
+       --중복된 순위를 건너뛰고 순위 부여
+       DENSE_RANK() OVER(ORDER BY salary DESC) as dense_rank,
+       --중복순위 상관 없이 다음 순위 부여
+       ROW_NUMBER() OVER (ORDER BY salary DESC) as row_number,
+       --중복 여부 관계없이 차례되로 순위 부여
+       rownum
+       --정렬되기 이전의 레코드 순서
+       FROM employees;
+
+--Hirearchical Query: 트리 형태의 구조를 추출
+--ROOT 노드: 조건 START WITH 로 설정
+--가지: 연결하기 위한 조건을 CONNECT BY PROIR로 설정
+--employees 테이블로 조직도 그려봅시다.
+--level(깊이)이라는 가상 컬럼을 사용할 수 있다
+SELECT level, first_name, manager_id, employee_id
+       FROM employees
+       START WITH manager_id IS NULL --ROOT 노드의 조건
+       CONNECT BY PRIOR employee_id=manager_id ORDER BY level;
+
+--연습문제:위 트리 구조에 매니저의 이름도 출력해주세요
