@@ -257,3 +257,88 @@ SELECT department_id,job_id,SUM(salary)
 FROM employees
 GROUP BY CUBE(department_id,job_id)
 ORDER BY department_id;
+
+-------------
+--Subquery
+-------------
+/*
+하나의 SQL이 다른 SQL 질의의 일부에 포함되는 경우
+*/
+--단일행 서브쿼리
+--서브쿼리의 결과가 단일행인 경우, 단일 행 비교 연산자를 사용(=,>,>=,<,<=,<>)
+
+--'Den'보다 급여를 많이 받는 사원의 이름과 급여는?
+--1. Den이 얼마나 급여를 받는지 -A
+--2. A보다 많은 급여를 받는 사람은?
+SELECT salary FROM employees WHERE first_name='Den';
+--11000:1
+SELECT first_name, salary FROM employees WHERE salary > 11000;
+--:2
+
+--합친다
+SELECT first_name, salary FROM employees
+       WHERE salary >(SELECT salary FROM employees WHERE
+       first_name='Den');
+       
+--연습:
+--급여의 중앙값보다 많이 받는 직원
+--1. 급여의 중앙값?
+--2. 급여를 중앙값보다 많이 받는 직원
+SELECT MEDIAN(salary) FROM employees;
+--6200:l
+SELECT first_name,salary FROM employees 
+       WHERE salary>6200;
+--쿼리 합치기
+SELECT first_name,salary FROM employees
+       WHERE salary>(SELECT MEDIAN(salary) FROM employees);
+
+--급여를 가장 적게 받는 사람의 이름, 급여, 사원 번호를 출력하시오
+SELECT MIN(salary) FROM employees;
+--2100
+SELECT first_name, salary, employee_id
+       FROM employees
+       WHERE salary=2100;
+--쿼리 합치기
+SELECT first_name, salary, employee_id
+       FROM employees
+       WHERE salary=(SELECT MIN(salary) FROM employees);
+       
+--다중행 서브쿼리
+--서브쿼리 결과 레코드가 둘 이상인 경우, 단순 비교 불가능
+--집합 연산에 관련된 IN, ANY, ALL, EXSIST 등을 이용해야 한다
+
+--110번 부서의 직원이 받는 급여는?
+SELECT salary FROM employees WHERE
+       department_id=110; --레코드 갯수 2
+SELECT first_name, salary FROM employees
+       WHERE salary=(SELECT salary FROM employees WHERE department_id=110);
+--Error: 서브쿼리의 결과 레코드는 2개
+--2개의 결과와 단일행 salary의 값을 비교할 수 없다
+
+--Fix
+SELECT first_name, salary FROM employees
+       WHERE salary IN(SELECT salary FROM employees
+       WHERE department_id=110); --IN
+SELECT first_name, salary FROM employees WHERE salary= ANY(SELECT
+       salary FROM employees WHERE department_id=110); --ANY
+
+--IN ,=ANY -> OR와 비슷
+
+SELECT first_name, salary FROM employees
+       WHERE salary>ALL(SELECT salary FROM employees
+       WHERE department_id=110);
+--ALL:AND와 비슷
+
+SELECT first_name, salary FROM employees
+       WHERE salary > ANY(SELECT salary FROM employees WHERE department_id=110);
+--salary > 12008 OR salary > 8300 ->동일
+
+--Correlated Query
+--포함한 쿼리(Outer Query), 포함된 쿼리(Inner Query)가 서로 연관관계를 맺는 쿼리
+SELECT first_name, salary, department_id
+       FROM employees outer --outer
+       WHERE salary >(SELECT AVG(salary) FROM employees WHERE
+       department_id=outer.department_id);
+--의미
+--사원 목록을 추출하되
+--자신이 속한 부서의 평균 급여보다 많이 받는 직원을 추출하자는 의미
