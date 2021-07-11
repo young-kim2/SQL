@@ -342,3 +342,60 @@ SELECT first_name, salary, department_id
 --의미
 --사원 목록을 추출하되
 --자신이 속한 부서의 평균 급여보다 많이 받는 직원을 추출하자는 의미
+
+--서브쿼리(INNER)가 수행되기 위해 OUTER의 컬럼값이 필요하고
+--OUTER 쿼리 수행이 완료되기 위해서는 서브쿼리(INNER)의 결과 값이 필요한 쿼리
+
+--서브쿼리 연습
+--각 부서별로 최고 급여를 받는 사원을 출력
+SELECT department_id, MAX(salary)
+       FROM employees
+       GROUP BY department_id;
+       
+--1.조건절에서 비교
+SELECT department_id, employee_id,
+       first_name, salary
+       FROM employees
+       WHERE(department_id,salary)IN(SELECT
+       department_id,MAX(salary)
+       FROM employees
+       GROUP BY department_id)
+       ORDER BY department_id;
+       
+--SUBQUERY: 임시테이블을 생성
+--2.부서별 최고 급여 테이블을 임시로 생성해서 테이블과 조인하는 방법
+SELECT emp.department_id,employee_id,
+      first_name,emp.salary
+      FROM employees emp,(SELECT department_id,MAX(Salary) salary
+      FROM employees
+      GROUP BY department_id)sal --임시테이블을 만들어서 sal 별칭의 부여
+      WHERE emp.department_id=sal.department_id AND
+      emp.salary=sal.salary
+      ORDER BY emp.department_id;
+      
+--3.Correlated Query 활용
+SELECT emp.department_id,employee_id,
+       first_name,emp.salary
+       FROM employees emp
+       WHERE emp.salary=(SELECT MAX(salary) FROM employees
+       WHERE department_id=emp.department_id)
+       ORDER BY department_id;
+       
+------------
+--TOP K Query
+------------
+--Oracle은 질의 수행 결과의 행번호를 확인할 수 있는 가상 컬럼 rownum을 제공
+
+--2007년 입사자 중에서 급여 순위 5위까지 뽑아봅시다
+SELECT rownum, first_name, salary
+       FROM employees; --OK
+
+SELECT rownum, first_name, salary
+       FROM employees
+       WHERE hire_date LIKE '07%' AND rownum<=5;
+       
+SELECT rownum, first_name,salary
+FROM employees
+WHERE hire_date LIKE '07%' AND rownum<=5
+ORDER BY salary DESC;
+--rownum이 정해진 이후 정렬을 수행
