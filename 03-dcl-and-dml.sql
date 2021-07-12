@@ -20,6 +20,9 @@ SELECT*FROM USER_USERS;
 SELECT*FROM ALL_USERS;
 
 --로그인 권한 부여
+CREATE USER C##KIMY IDENTIFIED BY 1234;
+--로그인할 수 없는 상태
+--적절한 권한을 부여해야 한다
 GRANT create session TO C##KIMY;
 --C##KIMY에게 세션 생성(로그인)권한을 부여
 
@@ -28,6 +31,7 @@ CREATE TABLE test(a NUMBER);--권한 불충분
 */
 GRANT connect, resource TO C##KIMY;
 --접속과 자원 접근 롤을 C##KIMY에게 부여
+--일반 데이터베이스 사용자로 활용 가능
 
 /*다시 로그인 해서 다음의 쿼리를 수행해 봅니다.
 CREATE TABLE test(a NUMBER); --테이블이 생성
@@ -85,10 +89,59 @@ SELECT*FROM role_sys_privs WHERE role='RESOURCE';
 
 SHOW USER;
 --System 계정으로 진행
---HR 계정의 employees 테이블의 조회 권한을 C##KIMY에게 부여하고 싶다면
+--HR 계정의 employees 테이블의 조회 권한을 C##KIMY에게 부여하고 싶다면(system)
 GRANT SELECT ON hr.employees TO C##KIMY;
+--권한의 부여
+REVOKE SELECT ON hr.employees FROM C##KIMY;
+--권한의 회수
 
 --C##KIMY로 진행
 SHOW USER;
 SELECT*FROM hr.employees;
 --hr.employees의 SELECT 권한을 부여받았으므로 테이블 조회 가능
+
+-----------
+--DDL
+-----------
+
+--내가 가진 table 확인
+SELECT*FROM tab;
+--테이블의 구조 확인
+DESC test;
+
+--테이블 삭제
+DROP TABLE test;
+SELECT*FROM tab;
+--휴지통
+PURGE RECYCLEBIN;
+--삭제된 테이블은 휴지통에 보관
+
+SELECT*FROM tab;
+
+--CREATE TABLE
+CREATE TABLE book(--컬럼 명세
+    book_id NUMBER(5), --5자리 숫자
+    title VARCHAR2(50), --50글자 가변문자
+    author VARCHAR2(10), --10글자 가변 문자열
+    put_date DATE DEFAULT SYSDATE --기본값은 현재시간
+    );
+DESC book;
+
+--서브쿼리를 활용한 테이블 생성
+--hr.employees 테이블을 기반으로 일부 데이터를 추출
+--새 테이블
+SELECT*fROM hr.employees WHERE job_id like 'IT_%';
+CREATE TABLE it_emps AS(
+       SELECT*FROM hr.employees WHERE job_id like 'IT_%'
+       );
+
+SELECT*FROM it_emps;
+CREATE TABLE emp_summary AS(
+       SELECT employee_id, first_name||' '||last_name full_name,
+       hire_date, salary
+       FROM hr.employees
+       );
+DESC emp_summary;
+
+--author 테이블
+DESC book;
