@@ -145,3 +145,56 @@ DESC emp_summary;
 
 --author 테이블
 DESC book;
+CREATE TABLE author(
+    author_id NUMBER(10),
+    author_name VARCHAR2(100) NOT NULL, --NULL일 수 없다
+    author_desc VARCHAR2(500),
+    PRIMARY KEY(author_id) --author_id 컬럼을 PK로
+    );
+    DESC author;
+    
+--book테이블에 author 테이블 연결을 위해
+--book 테이블의 author 컬럼을 삭제:DROP COLUMN
+ALTER TABLE book
+DROP COLUMN author;
+DESC book;
+
+--author 테이블 참조를 위한 author_id 컬럼을 book에 추가
+ALTER TABLE book
+ADD(author_id NUMBER(10));
+DESC book;
+
+--book 테이블의 PK로 사용할 book_id도 NUMBER(10)으로 변경
+ALTER TABLE book
+MODIFY(book_id NUMBER(10));
+
+--제약조건의 추가:ADD CONSTRAINT
+--book 테이블의 book_id를 PRIMARY KEY 제약조건 부여
+ALTER TABLE book
+ADD CONSTRAINT pk_book_id PRIMARY KEY(book_id);
+DESC book;
+
+--FOREIGN KEY 추가
+--book 테이블의 author_id가 author의 author_id를 참조
+ALTER TABLE book
+ADD CONSTRAINT fk_author_id FOREIGN KEY(author_id)
+REFERENCES author(author_id);
+
+--COMMENT
+COMMENT ON TABLE book IS 'Book Information';
+COMMENT ON TABLE author IS 'Author Information';
+
+--테이블 커맨트 확인
+SELECT*FROM user_tab_comments;
+SELECT comments FROM user_tab_comments
+WHERE table_name='BOOK';
+
+--Data Dictionary
+--Oracle은 내부에서 발생하는 모든 정보를 Data Dictionary에 담아두고 있다.
+--계정별로 USER_(일반 사용자), ALL_(전체 사용자), DBA_(관리자 전용) 접근 범위를 제한함
+--모든 딕셔너리 확인
+SHOW user;
+SELECT*FROM dictionary;
+
+--DBA_딕셔너리 확인
+--dba로 로그인 필요 as sysdba
