@@ -198,3 +198,17 @@ SELECT*FROM dictionary;
 
 --DBA_딕셔너리 확인
 --dba로 로그인 필요 as sysdba
+
+--dba로 로그인 필요 as sysdba
+
+--사용자 DB 객체 dictionary USER_OBJECTS
+SELECT*FROM user_objects;
+SELECT object_name, object_type FROM
+user_objects;
+SELECT*FROM user_objects WHERE 
+OBJECT_NAME='BOOK';
+
+--제약조건 확인 dictionary USER_CONTRAINTS
+SELECT*FROM user_constraints;
+--제약조건이 걸린 컬럼 확인
+SELECT*FROM user_cons_columns;
